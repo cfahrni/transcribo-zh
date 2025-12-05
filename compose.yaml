@@ -2,7 +2,7 @@ services:
   transcriber:
     image: yanick/audiotranscription:latest
     build:
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
       context: .
       platforms:
         - linux/amd64
