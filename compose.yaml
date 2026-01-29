@@ -1,5 +1,6 @@
 services:
   transcriber:
+    container_name: transcriber
     image: yanick/audiotranscription:latest
     build:
       dockerfile: Dockerfile
@@ -8,8 +9,8 @@ services:
         - linux/amd64
         - linux/arm64
     restart: unless-stopped
-    ports:
-      - 8080:8080
+    expose:
+      - "8080"
     volumes:
       - hugging_face_cache:/root/.cache/huggingface
     develop:
@@ -23,5 +24,27 @@ services:
             - driver: nvidia
               count: 1
               capabilities: ["gpu"]
+    networks:
+      - nginx-proxy-manager
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:2.13.6'
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '127.0.0.1:81:81'
+    volumes:
+      - nginx_proxy_manager_data:/data
+      - nginx_proxy_manager_letsencrypt:/etc/letsencrypt
+    networks:
+      - nginx-proxy-manager
+
 volumes:
   hugging_face_cache:
+  nginx_proxy_manager_data:
+  nginx_proxy_manager_letsencrypt:
+
+networks:
+  nginx-proxy-manager:
+    driver: bridge
